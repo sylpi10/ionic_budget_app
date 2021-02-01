@@ -2,7 +2,7 @@
    <ion-grid>
   <ion-page>
     <ion-header :translucent="true">
-      <ion-toolbar color="primary">
+      <ion-toolbar color="warning">
         <ion-title>Home</ion-title>
       </ion-toolbar>
     </ion-header>
@@ -20,18 +20,18 @@
             <ion-card>
               <!-- <div class="expense-wrapper"> -->
                 <ion-card-header>
-                  <ion-label>New Expense </ion-label>
+                  <ion-text clolr="warning">New Expense </ion-text>
                   </ion-card-header>
                    <ion-card-content>
                   <ion-item>
-                    <ion-input type="text" placeholder="Description"
+                    <ion-input type="text" placeholder="Description" clearinput="true"
                       :value="description" @ionChange="description=$event.target.value"
                      ></ion-input>
                   </ion-item>
                    </ion-card-content>
                     <ion-card-content>
                   <ion-item>
-                      <ion-input class=input type="number" placeholder="Price" 
+                      <ion-input class="input" type="number" placeholder="Price" 
                         :value="price" @ionChange="price=$event.target.value"></ion-input>
                   </ion-item>
                  </ion-card-content>
@@ -40,7 +40,8 @@
                     @click="remove()">
                     
                   <ion-icon name="close-circle-outline"></ion-icon> Del</ion-button>
-                  <ion-button expand="block" color="primary" @click="addToList()" class="ion-margin-vertical">
+                  <ion-button expand="block" color="warning" @click.prevent="addToList()" 
+                  class="ion-margin-vertical">
                     <ion-icon name="add-sharp"></ion-icon>Add an expense</ion-button>
                   </ion-row>
             </ion-card>
@@ -56,7 +57,11 @@
                 </ion-list>
               </ion-card-content>
             </ion-card>
-           
+            <ion-item v-if="boughtItems.length > 0">
+                  <ion-label>
+                    Total: {{calcTotal}} €
+                  </ion-label>
+            </ion-item>
             </ion-col>
         </ion-row>
       </div>
@@ -67,8 +72,8 @@
 
 <script lang="ts">
 import { IonContent, IonHeader, IonPage, IonTitle, IonItem, IonList,
-         IonToolbar, IonInput, IonLabel,
-        IonCard, IonCardContent, IonCardTitle, 
+         IonToolbar, IonInput, IonLabel, alertController, IonText,
+        IonCard, IonCardContent,  
         IonButton, IonCol, IonGrid, IonRow, IonIcon, IonCardHeader
 } from '@ionic/vue';
 
@@ -85,28 +90,62 @@ import { Item } from '../beans/Item';
 export default defineComponent({
   name: 'Home',
   components: {
-    IonContent, IonItem, IonList,
-    IonHeader,
-    IonPage,
-    IonTitle,
-    IonToolbar,
-    IonInput,
-    IonLabel,
-    IonCard, IonCardContent, IonCardHeader, IonButton, IonCol, IonGrid, IonRow, IonIcon
+    IonContent, IonItem, IonList, IonText,
+    IonHeader, IonPage,
+    IonTitle, IonToolbar,
+    IonInput, IonLabel,
+    IonCard, IonCardContent, IonCardHeader, 
+    IonButton, IonCol, IonGrid, IonRow, IonIcon, 
+    
   },
   data() {
     return {
       boughtItems: Array<Item>(),
-      description: "",
+      description: '',
       price: ""
     }
   },
+  computed: {
+    calcTotal(){
+      if (this.boughtItems.length > 0) {
+        let total = 0;
+          for (const item of this.boughtItems) {
+            total += parseInt(item.price);
+          }
+          return total;
+      }
+      return 0;
+    },
+
+  },
   methods: {
     async addToList(){
-      const newItem = new Item(this.description, this.price);
-      await this.boughtItems.push(newItem);
-      this.description = "";
-      this.price = "";
+      if (!(typeof(this.description) === "string" && this.description.length >= 2)) {
+        const alert = await alertController
+        .create({
+          cssClass: 'my-custom-class',
+          header: 'Error',
+          message: 'Description must be text and have minimum 2 chars',
+          buttons: ['OK'],
+        });
+      return alert.present();
+      }
+      else if (this.price.length < 1) {
+        const alert = await alertController
+        .create({
+          cssClass: 'my-custom-class',
+          header: 'Error',
+          message: 'Enter a price',
+          buttons: ['OK'],
+        });
+         return alert.present();
+      }else{
+        const newItem = new Item(this.description, this.price);
+        await this.boughtItems.push(newItem);
+        this.description = ''; 
+        this.price = ''; 
+      }
+    
     },
     remove(){
      this.boughtItems.splice(0, this.boughtItems.length);
@@ -139,5 +178,8 @@ ion-icon {
 
 #container a {
   text-decoration: none;
+}
+.my-custom-class{
+  color: red;
 }
 </style>
