@@ -31,7 +31,7 @@
                    </ion-card-content>
                     <ion-card-content>
                   <ion-item>
-                      <ion-input class=input type="number" placeholder="Montant" 
+                      <ion-input class=input type="number" placeholder="Price" 
                         :value="price" @ionChange="price=$event.target.value"></ion-input>
                   </ion-item>
                  </ion-card-content>
@@ -46,11 +46,14 @@
             </ion-card>
 
             <ion-card v-for="item in boughtItems" v-bind:key="item">
-              <ion-card-header >
-                <ion-card-title>{{item.description}}</ion-card-title>
-              </ion-card-header>
-              <ion-card-content>
-                Price: {{item.price}} €
+              <ion-card-content class="ion-text-start">
+                <ion-list>
+                <ion-item>
+                  <ion-label>
+                    {{item.description}}: {{item.price}} €
+                  </ion-label>
+                </ion-item>
+                </ion-list>
               </ion-card-content>
             </ion-card>
            
@@ -63,8 +66,10 @@
 </template>
 
 <script lang="ts">
-import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonInput, IonLabel,
-        IonCard, IonCardContent, IonCardTitle, IonButton, IonCol, IonGrid, IonRow, IonIcon, IonCardHeader
+import { IonContent, IonHeader, IonPage, IonTitle, IonItem, IonList,
+         IonToolbar, IonInput, IonLabel,
+        IonCard, IonCardContent, IonCardTitle, 
+        IonButton, IonCol, IonGrid, IonRow, IonIcon, IonCardHeader
 } from '@ionic/vue';
 
 import{addIcons}from"ionicons";
@@ -80,14 +85,14 @@ import { Item } from '../beans/Item';
 export default defineComponent({
   name: 'Home',
   components: {
-    IonContent,
+    IonContent, IonItem, IonList,
     IonHeader,
     IonPage,
     IonTitle,
     IonToolbar,
     IonInput,
     IonLabel,
-    IonCard, IonCardContent, IonCardTitle, IonCardHeader, IonButton, IonCol, IonGrid, IonRow, IonIcon
+    IonCard, IonCardContent, IonCardHeader, IonButton, IonCol, IonGrid, IonRow, IonIcon
   },
   data() {
     return {
@@ -97,14 +102,14 @@ export default defineComponent({
     }
   },
   methods: {
-    addToList(){
+    async addToList(){
       const newItem = new Item(this.description, this.price);
-      this.boughtItems.push(newItem);
-      console.log(this.boughtItems);
-      
+      await this.boughtItems.push(newItem);
+      this.description = "";
+      this.price = "";
     },
     remove(){
-      alert('todo: remove logic');
+     this.boughtItems.splice(0, this.boughtItems.length);
     }
   }
 
